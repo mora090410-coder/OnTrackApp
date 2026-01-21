@@ -1,37 +1,8 @@
-import { useState, FormEvent } from 'react';
+const TALLY_URL = 'https://tally.so/r/xXJDyG';
 
 function App() {
-    const [email, setEmail] = useState('');
-    const [status, setStatus] = useState<'idle' | 'error' | 'success'>('idle');
-    const [errorMessage, setErrorMessage] = useState('');
-
-    const validateEmail = (email: string): boolean => {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    };
-
-    const handleSubmit = (e: FormEvent) => {
-        e.preventDefault();
-
-        if (!validateEmail(email)) {
-            setStatus('error');
-            setErrorMessage('Please enter a valid email address.');
-            return;
-        }
-
-        // Store in localStorage
-        const earlyAccessEmails = JSON.parse(localStorage.getItem('earlyAccessEmails') || '[]');
-        earlyAccessEmails.push({ email, timestamp: new Date().toISOString() });
-        localStorage.setItem('earlyAccessEmails', JSON.stringify(earlyAccessEmails));
-
-        // Log to console for debugging
-        console.log('Early access signup:', { email, timestamp: new Date().toISOString() });
-
-        setStatus('success');
-    };
-
-    const scrollToForm = () => {
-        document.getElementById('email-form')?.scrollIntoView({ behavior: 'smooth' });
+    const handleCtaClick = (buttonName: string) => {
+        console.log(`CTA clicked: ${buttonName}`);
     };
 
     return (
@@ -40,9 +11,15 @@ function App() {
             <header className="header">
                 <div className="container header-inner">
                     <a href="/" className="wordmark">OnTrack</a>
-                    <button onClick={scrollToForm} className="btn btn-secondary">
+                    <a
+                        href={TALLY_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-secondary"
+                        onClick={() => handleCtaClick('Header - Join the club')}
+                    >
                         Join the club
-                    </button>
+                    </a>
                 </div>
             </header>
 
@@ -56,9 +33,15 @@ function App() {
                             and prove they're running the right process—so you never wonder if you're doing enough.
                         </p>
                         <div className="hero-cta">
-                            <button onClick={scrollToForm} className="btn btn-primary">
+                            <a
+                                href={TALLY_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-primary"
+                                onClick={() => handleCtaClick('Hero - Get early access')}
+                            >
                                 Get early access
-                            </button>
+                            </a>
                         </div>
                         <p className="hero-micro">
                             Launching February 2026 • Built for youth sports families
@@ -162,49 +145,15 @@ function App() {
                         <p className="final-cta-body">
                             Get early access to OnTrack and join the families who run recruiting like a process, not a hope.
                         </p>
-                        <button onClick={scrollToForm} className="btn btn-primary">
+                        <a
+                            href={TALLY_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-primary"
+                            onClick={() => handleCtaClick('Final CTA - Get early access')}
+                        >
                             Get early access
-                        </button>
-                    </div>
-                </section>
-
-                {/* Email Capture Form */}
-                <section id="email-form" className="email-form-section">
-                    <div className="container">
-                        <div className="email-form-wrapper">
-                            <h2 className="email-form-title">Get early access</h2>
-
-                            {status === 'success' ? (
-                                <div className="email-success">
-                                    <p className="email-success-text">You're on the list.</p>
-                                </div>
-                            ) : (
-                                <>
-                                    <form className="email-form" onSubmit={handleSubmit}>
-                                        <input
-                                            type="email"
-                                            className={`email-input ${status === 'error' ? 'error' : ''}`}
-                                            placeholder="you@example.com"
-                                            value={email}
-                                            onChange={(e) => {
-                                                setEmail(e.target.value);
-                                                if (status === 'error') setStatus('idle');
-                                            }}
-                                            aria-label="Email address"
-                                        />
-                                        <button type="submit" className="btn btn-primary">
-                                            Join the club
-                                        </button>
-                                    </form>
-                                    {status === 'error' && (
-                                        <p className="email-error">{errorMessage}</p>
-                                    )}
-                                    <p className="email-form-micro">
-                                        No spam. Just product updates.
-                                    </p>
-                                </>
-                            )}
-                        </div>
+                        </a>
                     </div>
                 </section>
             </main>
