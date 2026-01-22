@@ -33,13 +33,15 @@ export default function LandingPage() {
                             and prove they're running the right process—so you never wonder if you're doing enough.
                         </p>
                         <div className="hero-cta">
-                            <Link
-                                to="/sign-up"
+                            <a
+                                href={TALLY_URL}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="btn btn-primary"
                                 onClick={() => handleCtaClick('Hero - Get early access')}
                             >
                                 Get early access
-                            </Link>
+                            </a>
                         </div>
                         <p className="hero-micro">
                             Launching February 2026 • Built for youth sports families
@@ -143,13 +145,15 @@ export default function LandingPage() {
                         <p className="final-cta-body">
                             Get early access to OnTrack and join the families who run recruiting like a process, not a hope.
                         </p>
-                        <Link
-                            to="/sign-up"
+                        <a
+                            href={TALLY_URL}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="btn btn-primary"
                             onClick={() => handleCtaClick('Final CTA - Get early access')}
                         >
                             Get early access
-                        </Link>
+                        </a>
                     </div>
                 </section>
             </main>
