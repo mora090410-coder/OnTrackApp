@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, createAuthenticatedClient } from '../lib/supabase';
+import { useAuth } from './useAuth';
 import { useAthleteContext } from '../contexts/AthleteContext';
 import { calculateFollowUpDate } from '../lib/followUpRules';
 import { format } from 'date-fns';
@@ -44,9 +45,15 @@ interface UseInteractionsReturn {
 
 export function useInteractions(): UseInteractionsReturn {
     const { athlete } = useAthleteContext();
+    const { getToken } = useAuth();
     const [interactions, setInteractions] = useState<Interaction[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const getClient = useCallback(async () => {
+        const token = await getToken({ template: 'supabase' });
+        return token ? createAuthenticatedClient(token) : supabase;
+    }, [getToken]);
 
     const fetchInteractions = useCallback(async () => {
         if (!athlete?.id) {
@@ -57,8 +64,9 @@ export function useInteractions(): UseInteractionsReturn {
         try {
             setLoading(true);
             setError(null);
+            const client = await getClient();
 
-            const { data, error: fetchError } = await supabase
+            const { data, error: fetchError } = await client
                 .from('interactions')
                 .select(`
           *,
@@ -78,7 +86,7 @@ export function useInteractions(): UseInteractionsReturn {
         } finally {
             setLoading(false);
         }
-    }, [athlete?.id]);
+    }, [athlete?.id, getClient]);
 
     useEffect(() => {
         fetchInteractions();
@@ -89,9 +97,10 @@ export function useInteractions(): UseInteractionsReturn {
 
         try {
             setError(null);
+            const client = await getClient();
 
             // Create interaction
-            const { data: newInteraction, error: createError } = await supabase
+            const { data: newInteraction, error: createError } = await client
                 .from('interactions')
                 .insert({
                     athlete_id: athlete.id,
@@ -110,7 +119,7 @@ export function useInteractions(): UseInteractionsReturn {
             const followUpDueDate = calculateFollowUpDate(data.type, data.date);
 
             if (followUpDueDate) {
-                const { error: followUpError } = await supabase
+                const { error: followUpError } = await client
                     .from('follow_ups')
                     .insert({
                         athlete_id: athlete.id,
@@ -139,7 +148,8 @@ export function useInteractions(): UseInteractionsReturn {
 
     const getInteractionsForSchool = async (schoolId: string): Promise<Interaction[]> => {
         try {
-            const { data, error: fetchError } = await supabase
+            const client = await getClient();
+            const { data, error: fetchError } = await client
                 .from('interactions')
                 .select(`
           *,

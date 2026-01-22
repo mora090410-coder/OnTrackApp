@@ -34,7 +34,12 @@ function App() {
                         path="/sign-in/*"
                         element={
                             <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-                                <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
+                                <SignIn
+                                    routing="path"
+                                    path="/sign-in"
+                                    signUpUrl="/sign-up"
+                                    forceRedirectUrl="/dashboard"
+                                />
                             </div>
                         }
                     />
@@ -42,7 +47,12 @@ function App() {
                         path="/sign-up/*"
                         element={
                             <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-                                <SignUp routing="path" path="/sign-up" signInUrl="/sign-in" />
+                                <SignUp
+                                    routing="path"
+                                    path="/sign-up"
+                                    signInUrl="/sign-in"
+                                    forceRedirectUrl="/dashboard"
+                                />
                             </div>
                         }
                     />

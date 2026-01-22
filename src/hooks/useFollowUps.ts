@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, createAuthenticatedClient } from '../lib/supabase';
+import { useAuth } from './useAuth';
 import { useAthleteContext } from '../contexts/AthleteContext';
 import { format, addDays } from 'date-fns';
 
@@ -40,11 +41,17 @@ interface UseFollowUpsReturn {
 
 export function useFollowUps(): UseFollowUpsReturn {
     const { athlete } = useAthleteContext();
+    const { getToken } = useAuth();
     const [followUps, setFollowUps] = useState<FollowUp[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const today = format(new Date(), 'yyyy-MM-dd');
+
+    const getClient = useCallback(async () => {
+        const token = await getToken({ template: 'supabase' });
+        return token ? createAuthenticatedClient(token) : supabase;
+    }, [getToken]);
 
     const fetchFollowUps = useCallback(async () => {
         if (!athlete?.id) {
@@ -55,8 +62,9 @@ export function useFollowUps(): UseFollowUpsReturn {
         try {
             setLoading(true);
             setError(null);
+            const client = await getClient();
 
-            const { data, error: fetchError } = await supabase
+            const { data, error: fetchError } = await client
                 .from('follow_ups')
                 .select(`
           *,
@@ -77,7 +85,7 @@ export function useFollowUps(): UseFollowUpsReturn {
         } finally {
             setLoading(false);
         }
-    }, [athlete?.id, today]);
+    }, [athlete?.id, today, getClient]);
 
     useEffect(() => {
         fetchFollowUps();
@@ -90,8 +98,9 @@ export function useFollowUps(): UseFollowUpsReturn {
     const markComplete = async (id: string): Promise<boolean> => {
         try {
             setError(null);
+            const client = await getClient();
 
-            const { error: updateError } = await supabase
+            const { error: updateError } = await client
                 .from('follow_ups')
                 .update({
                     completed: true,
@@ -114,10 +123,11 @@ export function useFollowUps(): UseFollowUpsReturn {
     const snooze = async (id: string, days: number): Promise<boolean> => {
         try {
             setError(null);
+            const client = await getClient();
 
             const snoozeUntil = format(addDays(new Date(), days), 'yyyy-MM-dd');
 
-            const { error: updateError } = await supabase
+            const { error: updateError } = await client
                 .from('follow_ups')
                 .update({
                     snoozed_until: snoozeUntil,

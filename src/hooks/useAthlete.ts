@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, createAuthenticatedClient } from '../lib/supabase';
 import { useAuth } from './useAuth';
 
 export interface Athlete {
@@ -48,11 +48,16 @@ interface CreateAthleteData {
 }
 
 export function useAthlete(): UseAthleteReturn {
-    const { userId, isLoaded, isSignedIn } = useAuth();
+    const { userId, isLoaded, isSignedIn, getToken } = useAuth();
     const [athlete, setAthlete] = useState<Athlete | null>(null);
     const [targetStrategy, setTargetStrategy] = useState<TargetStrategy | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const getClient = useCallback(async () => {
+        const token = await getToken({ template: 'supabase' });
+        return token ? createAuthenticatedClient(token) : supabase;
+    }, [getToken]);
 
     const fetchAthlete = useCallback(async () => {
         if (!userId) {
@@ -63,9 +68,10 @@ export function useAthlete(): UseAthleteReturn {
         try {
             setLoading(true);
             setError(null);
+            const client = await getClient();
 
             // Fetch athlete
-            const { data: athleteData, error: athleteError } = await supabase
+            const { data: athleteData, error: athleteError } = await client
                 .from('athletes')
                 .select('*')
                 .eq('user_id', userId)
@@ -80,7 +86,7 @@ export function useAthlete(): UseAthleteReturn {
                 setAthlete(athleteData);
 
                 // Fetch target strategy
-                const { data: strategyData, error: strategyError } = await supabase
+                const { data: strategyData, error: strategyError } = await client
                     .from('target_strategies')
                     .select('*')
                     .eq('athlete_id', athleteData.id)
@@ -103,7 +109,7 @@ export function useAthlete(): UseAthleteReturn {
         } finally {
             setLoading(false);
         }
-    }, [userId]);
+    }, [userId, getClient]);
 
     useEffect(() => {
         if (isLoaded && isSignedIn) {
@@ -115,13 +121,19 @@ export function useAthlete(): UseAthleteReturn {
     }, [isLoaded, isSignedIn, fetchAthlete]);
 
     const createAthlete = async (data: CreateAthleteData): Promise<Athlete | null> => {
+        console.log('Creating athlete for user:', userId);
         if (!userId) return null;
 
         try {
             setError(null);
+            const token = await getToken({ template: 'supabase' });
+            console.log('Supabase Token retrieved:', !!token);
+
+            const client = await getClient();
 
             // Create athlete
-            const { data: newAthlete, error: athleteError } = await supabase
+            console.log('Inserting athlete data...');
+            const { data: newAthlete, error: athleteError } = await client
                 .from('athletes')
                 .insert({
                     user_id: userId,
@@ -133,11 +145,17 @@ export function useAthlete(): UseAthleteReturn {
                 .select()
                 .single();
 
-            if (athleteError) throw athleteError;
+            if (athleteError) {
+                console.error('Supabase Insert Error:', athleteError);
+                throw athleteError;
+            }
+
+            console.log('Athlete created successfully:', newAthlete);
 
             // Create target strategy if provided
             if (data.targetStrategy && newAthlete) {
-                const { error: strategyError } = await supabase
+                console.log('Creating target strategy...');
+                const { error: strategyError } = await client
                     .from('target_strategies')
                     .insert({
                         athlete_id: newAthlete.id,
@@ -147,16 +165,14 @@ export function useAthlete(): UseAthleteReturn {
                         target_count: data.targetStrategy.target_count,
                     });
 
-                if (strategyError) {
-                    console.error('Error creating target strategy:', strategyError);
-                }
+                if (strategyError) console.error('Strategy Insert Error:', strategyError);
             }
 
             setAthlete(newAthlete);
             await fetchAthlete(); // Refresh to get complete data
             return newAthlete;
         } catch (err) {
-            console.error('Error creating athlete:', err);
+            console.error('Error creating athlete (Full):', err);
             setError(err instanceof Error ? err.message : 'Failed to create athlete');
             return null;
         }

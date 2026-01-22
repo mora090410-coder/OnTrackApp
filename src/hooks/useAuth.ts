@@ -4,10 +4,11 @@ import { useAuth as useClerkAuth, useUser } from '@clerk/clerk-react';
  * Custom hook wrapping Clerk auth with additional helpers
  */
 export function useAuth() {
-    const { isLoaded, isSignedIn, signOut } = useClerkAuth();
+    const { isLoaded, isSignedIn, signOut, getToken } = useClerkAuth();
     const { user } = useUser();
 
     return {
+        getToken,
         isLoaded,
         isSignedIn,
         user,

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, createAuthenticatedClient } from '../lib/supabase';
 import { useAthleteContext } from '../contexts/AthleteContext';
+import { useAuth } from './useAuth';
 
 export interface School {
     id: string;
@@ -62,9 +63,15 @@ interface UseSchoolsReturn {
 
 export function useSchools(): UseSchoolsReturn {
     const { athlete } = useAthleteContext();
+    const { getToken } = useAuth();
     const [schools, setSchools] = useState<School[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const getClient = useCallback(async () => {
+        const token = await getToken({ template: 'supabase' });
+        return token ? createAuthenticatedClient(token) : supabase;
+    }, [getToken]);
 
     const fetchSchools = useCallback(async () => {
         if (!athlete?.id) {
@@ -75,8 +82,9 @@ export function useSchools(): UseSchoolsReturn {
         try {
             setLoading(true);
             setError(null);
+            const client = await getClient();
 
-            const { data, error: fetchError } = await supabase
+            const { data, error: fetchError } = await client
                 .from('schools')
                 .select('*')
                 .eq('athlete_id', athlete.id)
@@ -91,7 +99,7 @@ export function useSchools(): UseSchoolsReturn {
         } finally {
             setLoading(false);
         }
-    }, [athlete?.id]);
+    }, [athlete?.id, getClient]);
 
     useEffect(() => {
         fetchSchools();
@@ -102,8 +110,9 @@ export function useSchools(): UseSchoolsReturn {
 
         try {
             setError(null);
+            const client = await getClient();
 
-            const { data: newSchool, error: createError } = await supabase
+            const { data: newSchool, error: createError } = await client
                 .from('schools')
                 .insert({
                     athlete_id: athlete.id,
@@ -131,8 +140,9 @@ export function useSchools(): UseSchoolsReturn {
     const updateSchool = async (id: string, data: Partial<School>): Promise<boolean> => {
         try {
             setError(null);
+            const client = await getClient();
 
-            const { error: updateError } = await supabase
+            const { error: updateError } = await client
                 .from('schools')
                 .update(data)
                 .eq('id', id);
@@ -153,8 +163,9 @@ export function useSchools(): UseSchoolsReturn {
     const deleteSchool = async (id: string): Promise<boolean> => {
         try {
             setError(null);
+            const client = await getClient();
 
-            const { error: deleteError } = await supabase
+            const { error: deleteError } = await client
                 .from('schools')
                 .delete()
                 .eq('id', id);
@@ -173,7 +184,8 @@ export function useSchools(): UseSchoolsReturn {
     // Coach operations
     const getCoaches = async (schoolId: string): Promise<Coach[]> => {
         try {
-            const { data, error: fetchError } = await supabase
+            const client = await getClient();
+            const { data, error: fetchError } = await client
                 .from('coaches')
                 .select('*')
                 .eq('school_id', schoolId)
@@ -191,8 +203,9 @@ export function useSchools(): UseSchoolsReturn {
     const createCoach = async (data: CreateCoachData): Promise<Coach | null> => {
         try {
             setError(null);
+            const client = await getClient();
 
-            const { data: newCoach, error: createError } = await supabase
+            const { data: newCoach, error: createError } = await client
                 .from('coaches')
                 .insert({
                     school_id: data.school_id,
@@ -218,8 +231,9 @@ export function useSchools(): UseSchoolsReturn {
     const updateCoach = async (id: string, data: Partial<Coach>): Promise<boolean> => {
         try {
             setError(null);
+            const client = await getClient();
 
-            const { error: updateError } = await supabase
+            const { error: updateError } = await client
                 .from('coaches')
                 .update(data)
                 .eq('id', id);
@@ -237,8 +251,9 @@ export function useSchools(): UseSchoolsReturn {
     const deleteCoach = async (id: string): Promise<boolean> => {
         try {
             setError(null);
+            const client = await getClient();
 
-            const { error: deleteError } = await supabase
+            const { error: deleteError } = await client
                 .from('coaches')
                 .delete()
                 .eq('id', id);
