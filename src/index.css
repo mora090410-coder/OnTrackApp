@@ -1,5 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Keep existing landing page styles for backwards compatibility */
 /* CSS Reset & Variables */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -15,11 +22,11 @@
   --color-success: #059669;
   --color-error: #DC2626;
   --color-border: #E5E7EB;
-  
+
   --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-size-body: 17px;
   --line-height-body: 1.6;
-  
+
   --max-width: 640px;
   --spacing-xs: 8px;
   --spacing-sm: 16px;
@@ -27,7 +34,7 @@
   --spacing-lg: 48px;
   --spacing-xl: 72px;
   --spacing-2xl: 96px;
-  
+
   --radius-sm: 8px;
   --radius-md: 12px;
 }
