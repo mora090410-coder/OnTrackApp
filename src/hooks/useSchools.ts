@@ -182,7 +182,7 @@ export function useSchools(): UseSchoolsReturn {
     };
 
     // Coach operations
-    const getCoaches = async (schoolId: string): Promise<Coach[]> => {
+    const getCoaches = useCallback(async (schoolId: string): Promise<Coach[]> => {
         try {
             const client = await getClient();
             const { data, error: fetchError } = await client
@@ -198,9 +198,9 @@ export function useSchools(): UseSchoolsReturn {
             console.error('Error fetching coaches:', err);
             return [];
         }
-    };
+    }, [getClient]);
 
-    const createCoach = async (data: CreateCoachData): Promise<Coach | null> => {
+    const createCoach = useCallback(async (data: CreateCoachData): Promise<Coach | null> => {
         try {
             setError(null);
             const client = await getClient();
@@ -226,9 +226,9 @@ export function useSchools(): UseSchoolsReturn {
             setError(err instanceof Error ? err.message : 'Failed to create coach');
             return null;
         }
-    };
+    }, [getClient]);
 
-    const updateCoach = async (id: string, data: Partial<Coach>): Promise<boolean> => {
+    const updateCoach = useCallback(async (id: string, data: Partial<Coach>): Promise<boolean> => {
         try {
             setError(null);
             const client = await getClient();
@@ -246,9 +246,9 @@ export function useSchools(): UseSchoolsReturn {
             setError(err instanceof Error ? err.message : 'Failed to update coach');
             return false;
         }
-    };
+    }, [getClient]);
 
-    const deleteCoach = async (id: string): Promise<boolean> => {
+    const deleteCoach = useCallback(async (id: string): Promise<boolean> => {
         try {
             setError(null);
             const client = await getClient();
@@ -266,7 +266,7 @@ export function useSchools(): UseSchoolsReturn {
             setError(err instanceof Error ? err.message : 'Failed to delete coach');
             return false;
         }
-    };
+    }, [getClient]);
 
     return {
         schools,
