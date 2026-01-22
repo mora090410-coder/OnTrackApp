@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 const TALLY_URL = 'https://tally.so/r/xXJDyG';
 
 export default function LandingPage() {
@@ -10,16 +12,14 @@ export default function LandingPage() {
             {/* Header */}
             <header className="header">
                 <div className="container header-inner">
-                    <a href="/" className="wordmark">OnTrack</a>
-                    <a
-                        href={TALLY_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                    <Link to="/" className="wordmark">OnTrack</Link>
+                    <Link
+                        to="/sign-up"
                         className="btn btn-secondary"
                         onClick={() => handleCtaClick('Header - Join the club')}
                     >
                         Join the club
-                    </a>
+                    </Link>
                 </div>
             </header>
 
@@ -33,15 +33,13 @@ export default function LandingPage() {
                             and prove they're running the right process—so you never wonder if you're doing enough.
                         </p>
                         <div className="hero-cta">
-                            <a
-                                href={TALLY_URL}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <Link
+                                to="/sign-up"
                                 className="btn btn-primary"
                                 onClick={() => handleCtaClick('Hero - Get early access')}
                             >
                                 Get early access
-                            </a>
+                            </Link>
                         </div>
                         <p className="hero-micro">
                             Launching February 2026 • Built for youth sports families
@@ -145,15 +143,13 @@ export default function LandingPage() {
                         <p className="final-cta-body">
                             Get early access to OnTrack and join the families who run recruiting like a process, not a hope.
                         </p>
-                        <a
-                            href={TALLY_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <Link
+                            to="/sign-up"
                             className="btn btn-primary"
                             onClick={() => handleCtaClick('Final CTA - Get early access')}
                         >
                             Get early access
-                        </a>
+                        </Link>
                     </div>
                 </section>
             </main>

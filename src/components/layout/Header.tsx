@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { UserButton } from '@clerk/clerk-react';
+import LogInteractionModal from '../interactions/LogInteractionModal';
 
 interface HeaderProps {
     onMenuClick: () => void;
@@ -75,19 +76,16 @@ export default function Header({ onMenuClick }: HeaderProps) {
             </header>
 
             {/* Log Interaction Modal - placeholder for Part 6 */}
+            {/* Log Interaction Modal */}
             {showLogModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
-                    <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-                        <h2 className="text-lg font-semibold mb-4">Log Interaction</h2>
-                        <p className="text-gray-600 mb-4">This feature will be implemented in Part 6.</p>
-                        <button
-                            onClick={() => setShowLogModal(false)}
-                            className="w-full py-2 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
+                <LogInteractionModal
+                    onClose={() => setShowLogModal(false)}
+                    onSuccess={() => {
+                        // In a real app with global state (like React Query), we'd invalidate queries here.
+                        // For now, the user will see the success message and likely navigate to a page where data refreshes.
+                        // Or we can rely on pages auto-refreshing on mount.
+                    }}
+                />
             )}
         </>
     );
